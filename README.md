@@ -1,3 +1,11 @@
+Cassida Pro fork of XMegaForArdino/arduino
+==========================================
+
+This is a fork of the XMegaForArduino project's arduino repository.
+It is primarily for GPL Compliance support.
+
+
+
 arduino
 =======
 
