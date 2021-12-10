@@ -8,12 +8,9 @@
 // This bootloader has been tested with the following processors:
 //
 //   ATxmega64D4
-//   ATxmega32E5
-//   ATxmega128A1
-//   ATxmega128A4U (non-USB mode)
+//   ATxmega32e5
 //
 /////////////////////////////////////////////////////////////////////////////////
-
 
 // XMEGA CHANGES:
 //
@@ -25,6 +22,15 @@
 // - XMEGA-specific NVRAM write functions
 
 // THIS is the _GENERIC_ version.  It requires some definitions to work properly
+
+//***********************************************************************************
+// CASSIDA CUSTOMIZATIONS
+// Cassida, Inc. uses this bootloader for the C400 USB Controller board.  There are
+// currently two versions of this board.  The bootloader code has been modified
+// from the original in order to pre=assign GPIO levels according to the board type.
+//***********************************************************************************
+
+
 
 //----------------------------------------------------------
 // ORIGINAL COMMENT BLOCK FROM Arduino bootloader
@@ -623,6 +629,38 @@ unsigned char *p1;
 //  do something special if brown-out detected, like keeping the clock slow
 //  goto skip_clock; // if I did the B.O.D. skip the clock stuff (this is a battery system strategy)
   }
+
+  // SET UP SPECIFIC IO PINS
+  // (Cassida customization)
+
+#if IO_PIN_LEVEL
+
+#define SET_OUTPUT_PIN(P,X) { \
+  P##_DIR |= _BV(X);                      /* D manual section 11.12.1 */ \
+  *(&P##_PIN0CTRL + X) = PINCTRL_DEFAULT; /* D manual section 11.12.15 */ \
+  P##_OUT |= _BV(X); }                    /* D manual section 11.12.5 */
+
+#else // IO_PIN_LEVEL
+
+#define SET_OUTPUT_PIN(P,X) { \
+  P##_DIR |= _BV(X);                      /* D manual section 11.12.1 */ \
+  *(&P##_PIN0CTRL + X) = PINCTRL_DEFAULT; /* D manual section 11.12.15 */ \
+  P##_OUT &= ~_BV(X); }                   /* D manual section 11.12.5 */
+
+#endif // IO_PIN_LEVEL
+
+  // OUTPUT PINS: PC0, PC1, PC4, PC5, PD4, PD5, PD6, PD7
+  // (all others are left as-is i.e. input pins)
+
+  SET_OUTPUT_PIN(PORTC, 0);
+  SET_OUTPUT_PIN(PORTC, 1);
+  SET_OUTPUT_PIN(PORTC, 4);
+  SET_OUTPUT_PIN(PORTC, 5);
+  SET_OUTPUT_PIN(PORTD, 4);
+  SET_OUTPUT_PIN(PORTD, 5);
+  SET_OUTPUT_PIN(PORTD, 6);
+  SET_OUTPUT_PIN(PORTD, 7);
+
 
   // -------------------------------------------------
   // The CLOCK section (all xmegas need this, really)
